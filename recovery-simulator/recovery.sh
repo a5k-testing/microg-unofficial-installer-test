@@ -162,8 +162,8 @@ mkdir -p "${_android_data}"
 mkdir -p "${_android_ext_stor}"
 mkdir -p "${_android_sec_stor}"
 touch "${_android_tmp}/recovery.log"
-link_folder "${BASE_SIMULATION_PATH}/sbin" "${_android_sys}/bin"
-link_folder "${BASE_SIMULATION_PATH}/sdcard" "${_android_ext_stor}"
+link_folder "${BASE_SIMULATION_PATH:?}/sbin" "${_android_sys:?}/bin"
+link_folder "${BASE_SIMULATION_PATH:?}/sdcard" "${_android_ext_stor:?}"
 cp -pf -- "${_our_busybox:?}" "${BASE_SIMULATION_PATH:?}/system/bin/busybox" || fail_with_msg 'Failed to copy BusyBox'
 
 {
@@ -173,15 +173,15 @@ cp -pf -- "${_our_busybox:?}" "${BASE_SIMULATION_PATH:?}/system/bin/busybox" || 
   echo 'ro.product.cpu.abilist=x86_64,x86,arm64-v8a,armeabi-v7a,armeabi'
   echo 'ro.product.cpu.abilist32=x86,armeabi-v7a,armeabi'
   echo 'ro.product.cpu.abilist64=x86_64,arm64-v8a'
-} > "${_android_sys}/build.prop"
+} 1> "${_android_sys:?}/build.prop"
 
-touch "${BASE_SIMULATION_PATH}/AndroidManifest.xml"
-printf 'a\0n\0d\0r\0o\0i\0d\0.\0p\0e\0r\0m\0i\0s\0s\0i\0o\0n\0.\0F\0A\0K\0E\0_\0P\0A\0C\0K\0A\0G\0E\0_\0S\0I\0G\0N\0A\0T\0U\0R\0E\0' > "${BASE_SIMULATION_PATH}/AndroidManifest.xml"
-mkdir -p "${_android_sys}/framework"
-zip -D -9 -X -UN=n -nw -q "${_android_sys}/framework/framework-res.apk" 'AndroidManifest.xml' || fail_with_msg 'Failed compressing framework-res.apk'
-rm -f -- "${BASE_SIMULATION_PATH}/AndroidManifest.xml"
+touch "${BASE_SIMULATION_PATH:?}/AndroidManifest.xml"
+printf 'a\0n\0d\0r\0o\0i\0d\0.\0p\0e\0r\0m\0i\0s\0s\0i\0o\0n\0.\0F\0A\0K\0E\0_\0P\0A\0C\0K\0A\0G\0E\0_\0S\0I\0G\0N\0A\0T\0U\0R\0E\0' 1> "${BASE_SIMULATION_PATH:?}/AndroidManifest.xml"
+mkdir -p "${_android_sys:?}/framework"
+zip -D -9 -X -UN=n -nw -q "${_android_sys:?}/framework/framework-res.apk" 'AndroidManifest.xml' || fail_with_msg 'Failed compressing framework-res.apk'
+rm -f -- "${BASE_SIMULATION_PATH:?}/AndroidManifest.xml"
 
-cp -pf -- "${THIS_SCRIPT_DIR}/updater.sh" "${_android_tmp}/updater" || fail_with_msg 'Failed to copy the updater script'
+cp -pf -- "${THIS_SCRIPT_DIR:?}/updater.sh" "${_android_tmp:?}/updater" || fail_with_msg 'Failed to copy the updater script'
 chmod +x "${_android_tmp:?}/updater" || fail_with_msg "chmod failed on '${_android_tmp}/updater'"
 
 # Detect whether "export -f" is supported (0 means supported)
@@ -226,6 +226,10 @@ simulate_env()
   export TEST_INSTALL=true
 
   "${CUSTOM_BUSYBOX:?}" --install "${_android_sys:?}/bin" || fail_with_msg 'Failed to install BusyBox'
+  if test "${COVERAGE:-false}" != 'false'; then
+    cp -pf -- "${COVERAGE:?}" "${_android_sys:?}/bin/bashcov" || fail_with_msg 'Failed to copy Bashcov'
+  fi
+
   # shellcheck disable=SC2310
   override_command mount || return 123
   # shellcheck disable=SC2310
@@ -236,10 +240,6 @@ simulate_env()
   override_command su || return 123
   # shellcheck disable=SC2310
   override_command sudo || return 123
-
-  if test "${COVERAGE:-false}" != 'false'; then
-    cp -pf -- "${BASHCOV_CMD:?}" "${_android_sys:?}/bin/bashcov" || fail_with_msg 'Failed to copy the updater script'
-  fi
 }
 
 restore_env()
@@ -248,10 +248,6 @@ restore_env()
   unset BB_OVERRIDE_APPLETS
   unset -f -- mount umount chown su sudo
 }
-
-if test "${COVERAGE:-false}" != 'false'; then
-  cd "${_init_dir:?}" || fail_with_msg 'Failed to change back the folder'
-fi
 
 # Setup recovery output
 recovery_fd=99
@@ -286,7 +282,7 @@ flash_zips()
     if test "${COVERAGE:-false}" = 'false'; then
       "${CUSTOM_BUSYBOX:?}" sh -- "${_android_tmp:?}/updater" 3 "${recovery_fd:?}" "${_android_sec_stor:?}/${FLASHABLE_ZIP_NAME:?}" 1> >(tee -a "${recovery_logs_dir:?}/recovery-raw.log" "${recovery_logs_dir:?}/recovery-stdout.log" || true) 2> >(tee -a "${recovery_logs_dir:?}/recovery-raw.log" "${recovery_logs_dir:?}/recovery-stderr.log" 1>&2 || true)
     else
-      "${COVERAGE:?}" -- "${THIS_SCRIPT_DIR:?}/updater.sh" 3 "${recovery_fd:?}" "${_android_sec_stor:?}/${FLASHABLE_ZIP_NAME:?}"
+      bashcov -- "${_android_tmp:?}/updater" 3 "${recovery_fd:?}" "${_android_sec_stor:?}/${FLASHABLE_ZIP_NAME:?}" 1> >(tee -a "${recovery_logs_dir:?}/recovery-raw.log" "${recovery_logs_dir:?}/recovery-stdout.log" || true) 2> >(tee -a "${recovery_logs_dir:?}/recovery-raw.log" "${recovery_logs_dir:?}/recovery-stderr.log" 1>&2 || true)
     fi
     STATUS="${?}"
     set -e
@@ -331,7 +327,7 @@ parse_recovery_output()
     else
       echo "> ${full_line?}"
     fi
-  done < "${2:?}" > "${3:?}"
+  done < "${2:?}" 1> "${3:?}"
 }
 
 # Parse recovery output
