@@ -11,7 +11,7 @@ coverage:
       default:
         threshold: 20%
 fixes:
-  - "/home/runner/work/microg-unofficial-installer-test/microg-unofficial-installer-test/recovery-simulator/updater::/home/runner/work/microg-unofficial-installer-test/microg-unofficial-installer-test/recovery-simulator/updater.sh"
+  - "recovery-simulator/updater::recovery-simulator/updater.sh"
   - "/tmp/ANDR-RECOV-*/root/tmp/custom-setup-a5k/::/home/runner/work/microg-unofficial-installer-test/microg-unofficial-installer-test/"
 comment: false
 codecov:
