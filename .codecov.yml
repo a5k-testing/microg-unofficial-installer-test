@@ -13,3 +13,5 @@ coverage:
 fixes:
   - "/tmp/ANDR-RECOV-*/root/tmp/custom-setup-a5k/::/home/runner/work/microg-unofficial-installer-test/microg-unofficial-installer-test/"
 comment: false
+codecov:
+  disable_default_path_fixes: true
