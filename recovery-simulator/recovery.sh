@@ -96,9 +96,9 @@ if ! "${ENV_RESETTED:-false}"; then
   fi
 
   if test "${COVERAGE:-false}" = 'false'; then
-    exec env -i -- ENV_RESETTED=true THIS_SCRIPT="${THIS_SCRIPT:?}" OUR_TEMP_DIR="${OUR_TEMP_DIR:?}" CI="${CI:-}" APP_NAME="${APP_NAME:-}" PATH="${PATH:?}" bash -- "${THIS_SCRIPT:?}" "${@}" || fail_with_msg 'failed: exec'
+    exec -- env -i -- ENV_RESETTED=true THIS_SCRIPT="${THIS_SCRIPT:?}" OUR_TEMP_DIR="${OUR_TEMP_DIR:?}" CI="${CI:-}" APP_NAME="${APP_NAME:-}" PATH="${PATH:?}" bash -- "${THIS_SCRIPT:?}" "${@}" || fail_with_msg 'failed: exec'
   else
-    exec env -i -- ENV_RESETTED=true THIS_SCRIPT="${THIS_SCRIPT:?}" OUR_TEMP_DIR="${OUR_TEMP_DIR:?}" CI="${CI:-}" APP_NAME="${APP_NAME:-}" PATH="${PATH:?}" COVERAGE="${COVERAGE:-}" BASHCOV_CMD="$(command -v -- bashcov)" bashcov -- "${THIS_SCRIPT:?}" "${@}" || fail_with_msg 'failed: exec'
+    exec -- env -i -- ENV_RESETTED=true THIS_SCRIPT="${THIS_SCRIPT:?}" OUR_TEMP_DIR="${OUR_TEMP_DIR:?}" CI="${CI:-}" APP_NAME="${APP_NAME:-}" PATH="${PATH:?}" COVERAGE="true" bashcov -- "${THIS_SCRIPT:?}" "${@}" || fail_with_msg 'failed: exec'
   fi
   exit 127
 fi
@@ -110,6 +110,9 @@ uname_o_saved="$(uname -o)" || fail_with_msg 'Failed to get uname -o'
 
 # Check dependencies
 _our_busybox="$(command -v -- busybox)" || fail_with_msg 'BusyBox is missing'
+if test "${COVERAGE:-false}" != 'false'; then
+  COVERAGE="$(command -v -- bashcov)" || fail_with_msg 'Bashcov is missing'
+fi
 
 # Get dir of this script
 THIS_SCRIPT_DIR="$(dirname "${THIS_SCRIPT:?}")" || fail_with_msg 'Failed to get script dir'
@@ -283,7 +286,7 @@ flash_zips()
     if test "${COVERAGE:-false}" = 'false'; then
       "${CUSTOM_BUSYBOX:?}" sh -- "${_android_tmp:?}/updater" 3 "${recovery_fd:?}" "${_android_sec_stor:?}/${FLASHABLE_ZIP_NAME:?}" 1> >(tee -a "${recovery_logs_dir:?}/recovery-raw.log" "${recovery_logs_dir:?}/recovery-stdout.log" || true) 2> >(tee -a "${recovery_logs_dir:?}/recovery-raw.log" "${recovery_logs_dir:?}/recovery-stderr.log" 1>&2 || true)
     else
-      "${BASHCOV_CMD:?}" -- "${THIS_SCRIPT_DIR:?}/updater.sh" 3 "${recovery_fd:?}" "${_android_sec_stor:?}/${FLASHABLE_ZIP_NAME:?}"
+      "${COVERAGE:?}" -- "${THIS_SCRIPT_DIR:?}/updater.sh" 3 "${recovery_fd:?}" "${_android_sec_stor:?}/${FLASHABLE_ZIP_NAME:?}"
     fi
     STATUS="${?}"
     set -e
