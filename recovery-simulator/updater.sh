@@ -17,6 +17,7 @@ override_command_fallback()
 unset OUR_TEMP_DIR
 unset FUNCNAME
 unset HOSTNAME
+unset LINENO
 unset OPTIND
 
 IFS=' 	
