@@ -257,7 +257,7 @@ ui_debug 'Starting installation script...'
 if test "${COVERAGE:-false}" = 'false'; then
   "${OUR_BB:?}" sh "${TMP_PATH:?}/install.sh" Preloader "${TMP_PATH:?}"; STATUS="$?"
 else
-  bashcov -- sh "${TMP_PATH:?}/install.sh" Preloader "${TMP_PATH:?}"; STATUS="$?"
+  bashcov -- "${TMP_PATH:?}/install.sh" Preloader "${TMP_PATH:?}"; STATUS="$?"
 fi
 
 test -f "${TMP_PATH:?}/installed" || GENER_ERROR=1
