@@ -44,23 +44,7 @@ jobs:
           # Testing zip installation...
           bashcov './recovery-simulator/recovery.sh' ./output/*.zip
           printf '\n\n'
-          echo '==============='
-          echo 'RECOVERY OUTPUT'
-          echo '==============='
-          cat './recovery-simulator/output/recovery-output.log'
-      - name: "SHA256"
-        if: "${{ github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/') }}"
-        run: |
-          # SHA256...
-          sha256_hash='${{ steps.coverage.outputs.sha256_hash }}'
-          echo "::notice::${sha256_hash:?}"
-      - name: "Upload artifacts"
-        if: "${{ github.ref == 'refs/heads/mainX' }}"
-        uses: actions/upload-artifact@v3
-        with:
-          name: "microG unofficial installer OSS build (extract it)"
-          path: "output/*.zip*"
-          retention-days: 7
+          cat "${{ github.workspace }}/coverage/codecov-result.json"
       - name: "Upload reports to Codecov"
         uses: codecov/codecov-action@v3
         with:
