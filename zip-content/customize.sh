@@ -255,10 +255,11 @@ if [ "${DEBUG_LOG_ENABLED}" -eq 1 ]; then export DEBUG_LOG=1; fi
 ui_debug ''
 ui_debug 'Starting installation script...'
 if test "${COVERAGE:-false}" = 'false'; then
-  "${OUR_BB:?}" sh "${TMP_PATH:?}/install.sh" Preloader "${TMP_PATH:?}"; STATUS="$?"
+  "${OUR_BB:?}" sh "${TMP_PATH:?}/install.sh" Preloader "${TMP_PATH:?}"
 else
-  bashcov -- "${TMP_PATH:?}/install.sh" Preloader "${TMP_PATH:?}"; STATUS="$?"
+  bashcov -- "${TMP_PATH:?}/install.sh" Preloader "${TMP_PATH:?}"
 fi
+STATUS="$?"
 
 test -f "${TMP_PATH:?}/installed" || GENER_ERROR=1
 
