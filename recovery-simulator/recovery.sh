@@ -277,10 +277,11 @@ flash_zips()
     set +e
     # Execute the script that will run the flashable zip
     if test "${COVERAGE:-false}" = 'false'; then
-      "${CUSTOM_BUSYBOX:?}" sh -- "${_android_tmp:?}/updater" 3 "${recovery_fd:?}" "${_android_sec_stor:?}/${FLASHABLE_ZIP_NAME:?}" 1> >(tee -a "${recovery_logs_dir:?}/recovery-raw.log" "${recovery_logs_dir:?}/recovery-stdout.log" || true) 2> >(tee -a "${recovery_logs_dir:?}/recovery-raw.log" "${recovery_logs_dir:?}/recovery-stderr.log" 1>&2 || true); STATUS="${?}"
+      "${CUSTOM_BUSYBOX:?}" sh -- "${_android_tmp:?}/updater" 3 "${recovery_fd:?}" "${_android_sec_stor:?}/${FLASHABLE_ZIP_NAME:?}" 1> >(tee -a "${recovery_logs_dir:?}/recovery-raw.log" "${recovery_logs_dir:?}/recovery-stdout.log" || true) 2> >(tee -a "${recovery_logs_dir:?}/recovery-raw.log" "${recovery_logs_dir:?}/recovery-stderr.log" 1>&2 || true)
     else
-      "${BASHCOV_CMD:?}" -- "${THIS_SCRIPT_DIR:?}/updater.sh" 3 "${recovery_fd:?}" "${_android_sec_stor:?}/${FLASHABLE_ZIP_NAME:?}" 2> >(tee -a "${recovery_logs_dir:?}/recovery-raw.log" 1>&2 || true); STATUS="${?}"
+      "${BASHCOV_CMD:?}" -- "${THIS_SCRIPT_DIR:?}/updater.sh" 3 "${recovery_fd:?}" "${_android_sec_stor:?}/${FLASHABLE_ZIP_NAME:?}"
     fi
+    STATUS="${?}"
     set -e
     echo "custom_flash_end ${STATUS:?}" 1>&"${recovery_fd:?}"
     echo ''
