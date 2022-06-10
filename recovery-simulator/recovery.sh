@@ -182,6 +182,7 @@ zip -D -9 -X -UN=n -nw -q "${_android_sys:?}/framework/framework-res.apk" 'Andro
 rm -f -- "${BASE_SIMULATION_PATH:?}/AndroidManifest.xml"
 
 cp -pf -- "${THIS_SCRIPT_DIR:?}/updater.sh" "${_android_tmp:?}/updater" || fail_with_msg 'Failed to copy the updater script'
+cp -pf -- "${THIS_SCRIPT_DIR:?}/updater.sh" "${THIS_SCRIPT_DIR:?}/updater" || fail_with_msg 'Failed to copy the updater script'
 chmod +x "${_android_tmp:?}/updater" || fail_with_msg "chmod failed on '${_android_tmp}/updater'"
 
 if test "${COVERAGE:-false}" != 'false'; then
@@ -286,7 +287,7 @@ flash_zips()
     if test "${COVERAGE:-false}" = 'false'; then
       "${CUSTOM_BUSYBOX:?}" sh -- "${_android_tmp:?}/updater" 3 "${recovery_fd:?}" "${_android_sec_stor:?}/${FLASHABLE_ZIP_NAME:?}" 1> >(tee -a "${recovery_logs_dir:?}/recovery-raw.log" "${recovery_logs_dir:?}/recovery-stdout.log" || true) 2> >(tee -a "${recovery_logs_dir:?}/recovery-raw.log" "${recovery_logs_dir:?}/recovery-stderr.log" 1>&2 || true)
     else
-      bashcov -- "${THIS_SCRIPT_DIR:?}/updater.sh" 3 "${recovery_fd:?}" "${_android_sec_stor:?}/${FLASHABLE_ZIP_NAME:?}" 1> >(tee -a "${recovery_logs_dir:?}/recovery-raw.log" "${recovery_logs_dir:?}/recovery-stdout.log" || true) 2> >(tee -a "${recovery_logs_dir:?}/recovery-raw.log" "${recovery_logs_dir:?}/recovery-stderr.log" 1>&2 || true)
+      bashcov -- "${THIS_SCRIPT_DIR:?}/updater" 3 "${recovery_fd:?}" "${_android_sec_stor:?}/${FLASHABLE_ZIP_NAME:?}" 1> >(tee -a "${recovery_logs_dir:?}/recovery-raw.log" "${recovery_logs_dir:?}/recovery-stdout.log" || true) 2> >(tee -a "${recovery_logs_dir:?}/recovery-raw.log" "${recovery_logs_dir:?}/recovery-stderr.log" 1>&2 || true)
     fi
     STATUS="${?}"
     set -e
