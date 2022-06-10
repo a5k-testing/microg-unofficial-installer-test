@@ -179,7 +179,7 @@ zip -D -9 -X -UN=n -nw -q "${_android_sys}/framework/framework-res.apk" 'Android
 rm -f -- "${BASE_SIMULATION_PATH}/AndroidManifest.xml"
 
 cp -pf -- "${THIS_SCRIPT_DIR}/updater.sh" "${_android_tmp}/updater" || fail_with_msg 'Failed to copy the updater script'
-chmod +x "${_android_tmp}/updater" || fail_with_msg "chmod failed on '${_android_tmp}/updater'"
+chmod +x "${_android_tmp:?}/updater" || fail_with_msg "chmod failed on '${_android_tmp}/updater'"
 
 # Detect whether "export -f" is supported (0 means supported)
 _is_export_f_supported=0
@@ -233,6 +233,10 @@ simulate_env()
   override_command su || return 123
   # shellcheck disable=SC2310
   override_command sudo || return 123
+
+  if test "${COVERAGE:-false}" != 'false'; then
+    cp -pf -- "${BASHCOV_CMD:?}" "${_android_sys:?}/bin/bashcov" || fail_with_msg 'Failed to copy the updater script'
+  fi
 }
 
 restore_env()
@@ -275,7 +279,7 @@ flash_zips()
     if test "${COVERAGE:-false}" = 'false'; then
       "${CUSTOM_BUSYBOX:?}" sh -- "${_android_tmp:?}/updater" 3 "${recovery_fd:?}" "${_android_sec_stor:?}/${FLASHABLE_ZIP_NAME:?}" 1> >(tee -a "${recovery_logs_dir:?}/recovery-raw.log" "${recovery_logs_dir:?}/recovery-stdout.log" || true) 2> >(tee -a "${recovery_logs_dir:?}/recovery-raw.log" "${recovery_logs_dir:?}/recovery-stderr.log" 1>&2 || true); STATUS="${?}"
     else
-      ${BASHCOV_CMD:?} -- "${_android_tmp:?}/updater" 3 "${recovery_fd:?}" "${_android_sec_stor:?}/${FLASHABLE_ZIP_NAME:?}" 1> >(tee -a "${recovery_logs_dir:?}/recovery-raw.log" "${recovery_logs_dir:?}/recovery-stdout.log" || true) 2> >(tee -a "${recovery_logs_dir:?}/recovery-raw.log" "${recovery_logs_dir:?}/recovery-stderr.log" 1>&2 || true); STATUS="${?}"
+      "${BASHCOV_CMD:?}" -- "${_android_tmp:?}/updater" 3 "${recovery_fd:?}" "${_android_sec_stor:?}/${FLASHABLE_ZIP_NAME:?}" 1> >(tee -a "${recovery_logs_dir:?}/recovery-raw.log" "${recovery_logs_dir:?}/recovery-stdout.log" || true) 2> >(tee -a "${recovery_logs_dir:?}/recovery-raw.log" "${recovery_logs_dir:?}/recovery-stderr.log" 1>&2 || true); STATUS="${?}"
     fi
     set -e
     echo "custom_flash_end ${STATUS:?}" 1>&"${recovery_fd:?}"
