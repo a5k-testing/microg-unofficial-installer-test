@@ -184,6 +184,10 @@ rm -f -- "${BASE_SIMULATION_PATH:?}/AndroidManifest.xml"
 cp -pf -- "${THIS_SCRIPT_DIR:?}/updater.sh" "${_android_tmp:?}/updater" || fail_with_msg 'Failed to copy the updater script'
 chmod +x "${_android_tmp:?}/updater" || fail_with_msg "chmod failed on '${_android_tmp}/updater'"
 
+if test "${COVERAGE:-false}" != 'false'; then
+  cd "${_init_dir:?}" || fail_with_msg 'Failed to change back the folder'
+fi
+
 # Detect whether "export -f" is supported (0 means supported)
 _is_export_f_supported=0
 {
