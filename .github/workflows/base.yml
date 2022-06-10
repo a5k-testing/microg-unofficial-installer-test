@@ -34,6 +34,8 @@ jobs:
           gem install bashcov codecov
       - name: "Execute code coverage"
         id: "coverage"
+        env:
+          COVERAGE: true
         run: |
           # Executing code coverage...
           sudo apt-get -qq -y install moreutils 1>/dev/null
