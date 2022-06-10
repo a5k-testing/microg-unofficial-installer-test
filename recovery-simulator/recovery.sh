@@ -95,7 +95,7 @@ if ! "${ENV_RESETTED:-false}"; then
     APP_NAME='Gradle'
   fi
 
-  exec bashcov env -i ENV_RESETTED=true THIS_SCRIPT="${THIS_SCRIPT:?}" OUR_TEMP_DIR="${OUR_TEMP_DIR:?}" CI="${CI:-}" APP_NAME="${APP_NAME:-}" PATH="${PATH:?}" bash "${THIS_SCRIPT:?}" "${@}" || fail_with_msg 'failed: exec'
+  exec bashcov -- env -i ENV_RESETTED=true THIS_SCRIPT="${THIS_SCRIPT:?}" OUR_TEMP_DIR="${OUR_TEMP_DIR:?}" CI="${CI:-}" APP_NAME="${APP_NAME:-}" PATH="${PATH:?}" bash "${THIS_SCRIPT:?}" "${@}" || fail_with_msg 'failed: exec'
   exit 127
 fi
 unset ENV_RESETTED
