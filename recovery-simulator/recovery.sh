@@ -246,6 +246,10 @@ restore_env()
   unset -f -- mount umount chown su sudo
 }
 
+if test "${COVERAGE:-false}" != 'false'; then
+  cd "${_init_dir:?}" || fail_with_msg 'Failed to change back the folder'
+fi
+
 # Setup recovery output
 recovery_fd=99
 recovery_logs_dir="${THIS_SCRIPT_DIR:?}/output"
