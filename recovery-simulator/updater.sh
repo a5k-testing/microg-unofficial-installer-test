@@ -17,6 +17,10 @@ override_command_fallback()
 unset OUR_TEMP_DIR
 unset FUNCNAME
 unset HOSTNAME
+unset HOSTTYPE
+unset MACHTYPE
+unset OSTYPE
+unset OPTERR
 unset OPTIND
 
 IFS=' 	
