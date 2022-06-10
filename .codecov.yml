@@ -11,5 +11,5 @@ coverage:
       default:
         threshold: 20%
 fixes:
-  - "tmp/ANDR-RECOV-*/root/tmp/custom-setup-a5k/::"
+  - "/tmp/ANDR-RECOV-*/root/tmp/custom-setup-a5k/::/home/runner/work/microg-unofficial-installer-test/microg-unofficial-installer-test/"
 comment: false
