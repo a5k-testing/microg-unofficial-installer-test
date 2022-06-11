@@ -13,5 +13,7 @@ coverage:
         threshold: 20%
 fixes:
   - "recovery-simulator/ANDR-RECOV/root/tmp/*-customize.sh::zip-content/customize.sh"
-  - "recovery-simulator/ANDR-RECOV/root/tmp/custom-setup-a5k/default-settings.conf::zip-content/settings.conf"
+  - "recovery-simulator/ANDR-RECOV/root/tmp/custom-setup-a5k/install.sh::zip-content/scripts/install.sh"
+  - "recovery-simulator/ANDR-RECOV/root/tmp/custom-setup-a5k/uninstall.sh::zip-content/scripts/uninstall.sh"
   - "recovery-simulator/ANDR-RECOV/root/tmp/custom-setup-a5k/::zip-content/"
+  - "/default-settings.conf::/settings.conf"
