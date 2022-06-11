@@ -38,13 +38,12 @@ jobs:
           COVERAGE: true
         run: |
           # Executing code coverage...
-          sudo apt-get -qq -y install moreutils 1>/dev/null
+          #sudo apt-get -qq -y install moreutils 1>/dev/null
           export OPENSOURCE_ONLY='true'
-          bashcov './build.sh' | TZ=UTC ts '[%H:%M:%S]'
-          # Testing zip installation...
+          bash './build.sh' 1>/dev/null
           bashcov './recovery-simulator/recovery.sh' ./output/*.zip
           printf '\n\n'
-          cat "${{ github.workspace }}/coverage/codecov-result.json"
+          #cat "${{ github.workspace }}/coverage/codecov-result.json"
       - name: "Upload reports to Codecov"
         uses: codecov/codecov-action@v3
         with:
