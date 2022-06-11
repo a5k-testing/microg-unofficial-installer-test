@@ -264,7 +264,9 @@ STATUS="$?"
 test -f "${TMP_PATH:?}/installed" || GENER_ERROR=1
 
 export PATH="${PREVIOUS_PATH?}"
-delete_recursive_safe "${TMP_PATH:?}"
+if test "${COVERAGE:-false}" = 'false'; then
+  delete_recursive_safe "${TMP_PATH:?}"
+fi
 
 #!!! UNSAFE ENVIRONMENT FROM HERE !!!#
 
