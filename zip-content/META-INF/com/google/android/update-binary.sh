@@ -104,7 +104,9 @@ RANDOM="$$"
 package_extract_file 'customize.sh' "${_updatebin_our_main_script:?}"
 # shellcheck source=SCRIPTDIR/../../../../customize.sh
 . "${_updatebin_our_main_script:?}" || ui_error "Failed to source customize.sh"
-rm -f "${_updatebin_our_main_script:?}" || ui_error "Failed to delete customize.sh"
+if test "${COVERAGE:-false}" = 'false'; then
+  rm -f "${_updatebin_our_main_script:?}" || ui_error "Failed to delete customize.sh"
+fi
 unset _updatebin_our_main_script
 
 if test "${_updatebin_we_mounted_tmp:?}" = true; then
