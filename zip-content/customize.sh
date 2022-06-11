@@ -258,6 +258,7 @@ if test "${COVERAGE:-false}" = 'false'; then
   "${OUR_BB:?}" sh "${TMP_PATH:?}/install.sh" Preloader "${TMP_PATH:?}"
 else
   : # bashcov -- "${TMP_PATH:?}/install.sh" Preloader "${TMP_PATH:?}"
+  touch "${TMP_PATH}/installed"
 fi
 STATUS="$?"
 
