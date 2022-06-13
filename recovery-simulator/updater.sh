@@ -44,4 +44,4 @@ unset -f override_command_fallback
 unset OVERRIDE_DIR
 
 # shellcheck source=SCRIPTDIR/../zip-content/META-INF/com/google/android/update-binary.sh
-. "${TMPDIR:?}/update-binary" || exit "${?}"
+#. "${TMPDIR:?}/update-binary" || exit "${?}"
