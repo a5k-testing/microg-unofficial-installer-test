@@ -34,4 +34,5 @@ jobs:
           allowUpdates: true
           artifactErrorsFailBuild: true
           artifacts: "output/*.zip*"
+          generateReleaseNotes: true
           replacesArtifacts: false
