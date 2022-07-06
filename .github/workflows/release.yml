@@ -35,5 +35,4 @@ jobs:
           artifactErrorsFailBuild: true
           artifacts: "output/*.zip*"
           body: "**Changelog**: https://github.com/micro5k/microg-unofficial-installer/blob/main/CHANGELOG.rst"
-          generateReleaseNotes: true
           replacesArtifacts: false
