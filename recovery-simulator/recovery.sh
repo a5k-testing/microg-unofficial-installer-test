@@ -6,7 +6,7 @@
 # NOTE: This script simulate a real recovery but it relies on the flashable zip to use the suggested paths.
 # REALLY IMPORTANT: A misbehaving flashable zip can damage your real system.
 
-#if test -n "${PS4bak:-}"; then PS4="${PS4bak:?}"; fi
+if test -n "${PS4bak:-}"; then PS4="${PS4bak:?}"; fi
 
 set -e
 # shellcheck disable=SC3040
