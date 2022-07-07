@@ -33,6 +33,7 @@ jobs:
           # Installing SimpleCov, Bashcov and Codecov...
           gem install bashcov codecov
           gem update simplecov
+          gem cleanup
       - name: "Execute code coverage"
         id: "coverage"
         env:
