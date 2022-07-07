@@ -5,6 +5,6 @@
 require 'codecov'
 require 'simplecov'
 
-SimpleCov.enable_for_subprocesses true
+#SimpleCov.enable_for_subprocesses true
 SimpleCov.formatter Codecov::SimpleCov::Formatter
 SimpleCov.add_filter 'gradlew'
