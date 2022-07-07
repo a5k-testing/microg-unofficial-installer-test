@@ -6,7 +6,7 @@
 # NOTE: This script simulate a real recovery but it relies on the flashable zip to use the suggested paths.
 # REALLY IMPORTANT: A misbehaving flashable zip can damage your real system.
 
-#if test -n "${BACKUP_PS4:-}"; then PS4="${BACKUP_PS4:?}"; fi
+if test -n "${BACKUP_PS4:-}"; then PS4="${BACKUP_PS4:?}"; fi
 
 set -e
 # shellcheck disable=SC3040
