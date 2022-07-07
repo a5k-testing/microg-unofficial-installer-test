@@ -6,6 +6,8 @@
 # NOTE: This script simulate a real recovery but it relies on the flashable zip to use the suggested paths.
 # REALLY IMPORTANT: A misbehaving flashable zip can damage your real system.
 
+#if test -n "${PS4bak:-}"; then PS4="${PS4bak:?}"; fi
+
 set -e
 # shellcheck disable=SC3040
 set -o pipefail || true
@@ -99,7 +101,7 @@ if ! "${ENV_RESETTED:-false}"; then
     exec -- env -i -- ENV_RESETTED=true THIS_SCRIPT="${THIS_SCRIPT:?}" OUR_TEMP_DIR="${OUR_TEMP_DIR:?}" CI="${CI:-}" APP_NAME="${APP_NAME:-}" PATH="${PATH:?}" bash -- "${THIS_SCRIPT:?}" "${@}" || fail_with_msg 'failed: exec'
   else
     exec -- env -i -- ENV_RESETTED=true THIS_SCRIPT="${THIS_SCRIPT:?}" OUR_TEMP_DIR="${OUR_TEMP_DIR:?}" CI="${CI:-}" APP_NAME="${APP_NAME:-}" PATH="${PATH:?}" COVERAGE='true' LINENO=1 PS4="${PS4:?}" PARALLEL_TEST_GROUPS='1' TEST_ENV_NUMBER="${RANDOM:?}" bash -- "${THIS_SCRIPT:?}" "${@}" || fail_with_msg 'failed: exec'
-    #exec -- env -i -- ENV_RESETTED=true THIS_SCRIPT="${THIS_SCRIPT:?}" OUR_TEMP_DIR="${OUR_TEMP_DIR:?}" CI="${CI:-}" APP_NAME="${APP_NAME:-}" PATH="${PATH:?}" COVERAGE='true' LINENO="${LINENO:?}" PS4="${PS4:?}" PARALLEL_TEST_GROUPS='1' TEST_ENV_NUMBER="${RANDOM:?}" bashcov --command-name "Recovery simulator (after reset) - ${RANDOM:?}" -- "${THIS_SCRIPT:?}" "${@}" || fail_with_msg 'failed: exec'
+    #exec -- env -i -- ENV_RESETTED=true THIS_SCRIPT="${THIS_SCRIPT:?}" OUR_TEMP_DIR="${OUR_TEMP_DIR:?}" CI="${CI:-}" APP_NAME="${APP_NAME:-}" PATH="${PATH:?}" COVERAGE='true' PS4bak="${PS4:?}" PARALLEL_TEST_GROUPS='1' TEST_ENV_NUMBER="${RANDOM:?}" bashcov --command-name "Recovery simulator (after reset) - ${RANDOM:?}" -- "${THIS_SCRIPT:?}" "${@}" || fail_with_msg 'failed: exec'
   fi
   exit 127
 fi
