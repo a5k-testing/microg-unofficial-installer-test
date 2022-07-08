@@ -43,7 +43,7 @@ jobs:
           bash './build.sh' 1>/dev/null
           bashcov './recovery-simulator/recovery.sh' ./output/*.zip
           printf '\n\n'
-          #cat "${{ github.workspace }}/coverage/codecov-result.json"
+          cat "${{ github.workspace }}/coverage/codecov-result.json"
       - name: "Upload reports to Codecov"
         uses: codecov/codecov-action@v3
         with:
