@@ -31,7 +31,7 @@ jobs:
       - name: "Install Bashcov, SimpleCov and SimpleCov Cobertura"
         run: |
           # Installing Bashcov, SimpleCov and SimpleCov Cobertura...
-          gem install bashcov simplecov simplecov-cobertura codecov
+          gem install simplecov simplecov-cobertura bashcov
       - name: "Execute code coverage"
         id: "coverage"
         env:
