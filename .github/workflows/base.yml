@@ -30,8 +30,8 @@ jobs:
           ruby-version: "3.0"
       - name: "Install SimpleCov, Bashcov and Codecov"
         run: |
-          # Installing SimpleCov, Bashcov and Codecov...
-          gem install simplecov bashcov codecov
+          # Installing SimpleCov, SimpleCov Cobertura and Bashcov...
+          gem install simplecov simplecov-cobertura bashcov codecov
       - name: "Execute code coverage"
         id: "coverage"
         env:
