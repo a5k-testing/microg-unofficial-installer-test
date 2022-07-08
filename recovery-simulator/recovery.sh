@@ -6,7 +6,7 @@
 # NOTE: This script simulate a real recovery but it relies on the flashable zip to use the suggested paths.
 # REALLY IMPORTANT: A misbehaving flashable zip can damage your real system.
 
-if test -n "${BACKUP_PS4:-}"; then PS4="${BACKUP_PS4:?}"; fi
+#if test -n "${BACKUP_PS4:-}"; then PS4="${BACKUP_PS4:?}"; fi
 
 set -e
 # shellcheck disable=SC3040
@@ -100,8 +100,8 @@ if ! "${ENV_RESETTED:-false}"; then
   if test "${COVERAGE:-false}" = 'false'; then
     exec -- env -i -- ENV_RESETTED=true THIS_SCRIPT="${THIS_SCRIPT:?}" OUR_TEMP_DIR="${OUR_TEMP_DIR:?}" CI="${CI:-}" APP_NAME="${APP_NAME:-}" PATH="${PATH:?}" bash -- "${THIS_SCRIPT:?}" "${@}" || fail_with_msg 'failed: exec'
   else
-    exec -- env -i -- ENV_RESETTED=true THIS_SCRIPT="${THIS_SCRIPT:?}" OUR_TEMP_DIR="${OUR_TEMP_DIR:?}" CI="${CI:-}" APP_NAME="${APP_NAME:-}" PATH="${PATH:?}" COVERAGE='true' SHELLOPTS="${SHELLOPTS:?}" BACKUP_PS4="${PS4:?}" PARALLEL_TEST_GROUPS='1' TEST_ENV_NUMBER="${RANDOM:?}" BASHCOV_COMMAND_NAME="Recovery simulator (after reset) - ${RANDOM:?}" bash -- "${THIS_SCRIPT:?}" "${@}" || fail_with_msg 'failed: exec'
-    #exec -- env -i -- ENV_RESETTED=true THIS_SCRIPT="${THIS_SCRIPT:?}" OUR_TEMP_DIR="${OUR_TEMP_DIR:?}" CI="${CI:-}" APP_NAME="${APP_NAME:-}" PATH="${PATH:?}" COVERAGE='true' PS4bak="${PS4:?}" PARALLEL_TEST_GROUPS='1' TEST_ENV_NUMBER="${RANDOM:?}" bashcov --command-name "Recovery simulator (after reset) - ${RANDOM:?}" -- "${THIS_SCRIPT:?}" "${@}" || fail_with_msg 'failed: exec'
+    #exec -- env -i -- ENV_RESETTED=true THIS_SCRIPT="${THIS_SCRIPT:?}" OUR_TEMP_DIR="${OUR_TEMP_DIR:?}" CI="${CI:-}" APP_NAME="${APP_NAME:-}" PATH="${PATH:?}" COVERAGE='true' SHELLOPTS="${SHELLOPTS:?}" BACKUP_PS4="${PS4:?}" PARALLEL_TEST_GROUPS='1' TEST_ENV_NUMBER="${RANDOM:?}" BASHCOV_COMMAND_NAME="Recovery simulator (after reset) - ${RANDOM:?}" bash -- "${THIS_SCRIPT:?}" "${@}" || fail_with_msg 'failed: exec'
+    exec -- env -i -- ENV_RESETTED=true THIS_SCRIPT="${THIS_SCRIPT:?}" OUR_TEMP_DIR="${OUR_TEMP_DIR:?}" CI="${CI:-}" APP_NAME="${APP_NAME:-}" PATH="${PATH:?}" COVERAGE='true' PARALLEL_TEST_GROUPS='1' TEST_ENV_NUMBER="${RANDOM:?}" bashcov --command-name "Recovery simulator (after reset) - ${RANDOM:?}" -- "${THIS_SCRIPT:?}" "${@}" || fail_with_msg 'failed: exec'
   fi
   exit 127
 fi
