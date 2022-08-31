@@ -101,7 +101,7 @@ if ! "${ENV_RESETTED:-false}"; then
   if test "${COVERAGE:-false}" = 'false'; then
     exec env -i -- ENV_RESETTED=true THIS_SCRIPT="${THIS_SCRIPT:?}" OUR_TEMP_DIR="${OUR_TEMP_DIR:?}" CI="${CI:-}" APP_NAME="${APP_NAME:-}" PATH="${PATH:?}" bash -- "${THIS_SCRIPT:?}" "${@}" || fail_with_msg 'failed: exec'
   else
-    exec env -i -- ENV_RESETTED=true THIS_SCRIPT="${THIS_SCRIPT:?}" OUR_TEMP_DIR="${OUR_TEMP_DIR:?}" CI="${CI:-}" APP_NAME="${APP_NAME:-}" SHELLOPTS="${SHELLOPTS:-}" PATH="${PATH:?}" COVERAGE="true" bash -- "${THIS_SCRIPT:?}" "${@}" || fail_with_msg 'failed: exec'
+    exec env -i -- ENV_RESETTED=true THIS_SCRIPT="${THIS_SCRIPT:?}" OUR_TEMP_DIR="${OUR_TEMP_DIR:?}" CI="${CI:-}" APP_NAME="${APP_NAME:-}" SHELLOPTS="${SHELLOPTS:-}" PATH="${PATH:?}" COVERAGE="true" bashcov -- "${THIS_SCRIPT:?}" "${@}" || fail_with_msg 'failed: exec'
   fi
   exit 127
 fi
