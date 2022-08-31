@@ -6,11 +6,12 @@
 # NOTE: This script simulate a real recovery but it relies on the flashable zip to use the suggested paths.
 # REALLY IMPORTANT: A misbehaving flashable zip can damage your real system.
 
-#if test -n "${BACKUP_PS4:-}"; then PS4="${BACKUP_PS4:?}"; fi
-
 set -e
 # shellcheck disable=SC3040
 set -o pipefail || true
+
+# shellcheck disable=SC3028
+#case ":${SHELLOPTS:-}:" in *':xtrace:'*) set -x; COVERAGE='true';; *);; esac  # Auto-enable `set -x` for shells that do NOT support SHELLOPTS
 
 fail_with_msg()
 {
@@ -100,19 +101,21 @@ if ! "${ENV_RESETTED:-false}"; then
   if test "${COVERAGE:-false}" = 'false'; then
     exec -- env -i -- ENV_RESETTED=true THIS_SCRIPT="${THIS_SCRIPT:?}" OUR_TEMP_DIR="${OUR_TEMP_DIR:?}" CI="${CI:-}" APP_NAME="${APP_NAME:-}" PATH="${PATH:?}" bash -- "${THIS_SCRIPT:?}" "${@}" || fail_with_msg 'failed: exec'
   else
-    #exec -- env -i -- ENV_RESETTED=true THIS_SCRIPT="${THIS_SCRIPT:?}" OUR_TEMP_DIR="${OUR_TEMP_DIR:?}" CI="${CI:-}" APP_NAME="${APP_NAME:-}" PATH="${PATH:?}" COVERAGE='true' SHELLOPTS="${SHELLOPTS:?}" BACKUP_PS4="${PS4:?}" PARALLEL_TEST_GROUPS='1' TEST_ENV_NUMBER="${RANDOM:?}" BASHCOV_COMMAND_NAME="Recovery simulator (after reset) - ${RANDOM:?}" bash -- "${THIS_SCRIPT:?}" "${@}" || fail_with_msg 'failed: exec'
-    exec -- env -i -- ENV_RESETTED=true THIS_SCRIPT="${THIS_SCRIPT:?}" OUR_TEMP_DIR="${OUR_TEMP_DIR:?}" CI="${CI:-}" APP_NAME="${APP_NAME:-}" PATH="${PATH:?}" COVERAGE='true' PARALLEL_TEST_GROUPS='1' TEST_ENV_NUMBER="${RANDOM:?}" bashcov --command-name "Recovery simulator (after reset) - ${RANDOM:?}" -- "${THIS_SCRIPT:?}" "${@}" || fail_with_msg 'failed: exec'
+    exec -- env -i -- ENV_RESETTED=true THIS_SCRIPT="${THIS_SCRIPT:?}" OUR_TEMP_DIR="${OUR_TEMP_DIR:?}" CI="${CI:-}" APP_NAME="${APP_NAME:-}" PATH="${PATH:?}" COVERAGE="true" bash -- "${THIS_SCRIPT:?}" "${@}" || fail_with_msg 'failed: exec'
   fi
   exit 127
 fi
+#SHELLOPTS="${SHELLOPTS:-}"
+#PARALLEL_TEST_GROUPS='1' TEST_ENV_NUMBER="${RANDOM:?}" bashcov --command-name "Recovery simulator (after reset) - ${RANDOM:?}" -- "${THIS_SCRIPT:?}" "${@}"
 unset ENV_RESETTED
 if test -z "${CI:-}"; then unset CI; fi
 if test -z "${APP_NAME:-}"; then unset APP_NAME; fi
+if test -z "${SHELLOPTS:-}"; then unset SHELLOPTS; fi
 _backup_path="${PATH:?}"
 uname_o_saved="$(uname -o)" || fail_with_msg 'Failed to get uname -o'
 
 # Check dependencies
-_our_busybox="$(command -v -- busybox)" || fail_with_msg 'BusyBox is missing'
+_our_busybox="$(env -- which -- busybox)" || fail_with_msg 'BusyBox is missing'
 if test "${COVERAGE:-false}" != 'false'; then
   COVERAGE="$(command -v -- bashcov)" || fail_with_msg 'Bashcov is missing'
 fi
@@ -140,13 +143,14 @@ if test "${COVERAGE:-false}" != 'false'; then
 fi
 
 # Ensure we have a path for the temp dir and empty it (should be already empty, but we must be sure)
-if test -z "${OUR_TEMP_DIR:-}"; then fail_with_msg 'Failed to get a temp dir'; fi
+test -n "${OUR_TEMP_DIR:-}" || fail_with_msg 'Failed to get a temp dir'
 mkdir -p -- "${OUR_TEMP_DIR:?}" || fail_with_msg 'Failed to create our temp dir'
 rm -rf -- "${OUR_TEMP_DIR:?}"/* || fail_with_msg 'Failed to empty our temp dir'
 
 # Setup the needed variables
 BASE_SIMULATION_PATH="${OUR_TEMP_DIR}/root"  # Internal var
 _our_overrider_dir="${THIS_SCRIPT_DIR}/override"  # Internal var
+_our_overrider_script="${THIS_SCRIPT_DIR}/inc/configure-overrides.sh"  # Internal var
 _init_dir="$(pwd)" || fail_with_msg 'Failed to read the current dir'
 
 # Configure the Android recovery environment variables (they will be used later)
@@ -236,6 +240,7 @@ simulate_env()
   # Our custom variables
   export CUSTOM_BUSYBOX="${BASE_SIMULATION_PATH:?}/system/bin/busybox"
   export OVERRIDE_DIR="${_our_overrider_dir:?}"
+  export RS_OVERRIDE_SCRIPT="${_our_overrider_script:?}"
   export TEST_INSTALL=true
 
   "${CUSTOM_BUSYBOX:?}" --install "${_android_sys:?}/bin" || fail_with_msg 'Failed to install BusyBox'
@@ -320,6 +325,9 @@ if test "${uname_o_saved:?}" != 'MS/Windows'; then
   sudo chattr -a "${recovery_logs_dir:?}/recovery-stdout.log" || fail_with_msg "chattr failed on 'recovery-stdout.log'"
   sudo chattr -a "${recovery_logs_dir:?}/recovery-stderr.log" || fail_with_msg "chattr failed on 'recovery-stderr.log'"
 fi
+
+# List installed files
+#ls -ARFl --color=always -- "${BASE_SIMULATION_PATH}" || true
 
 parse_recovery_output()
 {
