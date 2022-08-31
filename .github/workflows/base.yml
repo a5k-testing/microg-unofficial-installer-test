@@ -47,7 +47,7 @@ jobs:
           bashcov './recovery-simulator/recovery.sh' ./output/*.zip
           printf '\n\n'
           #ls -R "${{ github.workspace }}/coverage"
-          cat "${{ github.workspace }}/coverage/codecov-result.json"
+          #cat "${{ github.workspace }}/coverage/codecov-result.json"
           echo '==============='
           echo 'RECOVERY OUTPUT'
           echo '==============='
