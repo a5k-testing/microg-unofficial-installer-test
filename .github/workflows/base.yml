@@ -28,10 +28,11 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: "3.0"
-      - name: "Install Bashcov, SimpleCov and SimpleCov Cobertura"
+      - name: "Install Bashcov and Codecov"
         run: |
-          # Installing Bashcov, SimpleCov and SimpleCov Cobertura...
-          gem install simplecov simplecov-cobertura bashcov
+          # Installing Bashcov and Codecov...
+          gem install bashcov codecov
+          #gem install simplecov simplecov-cobertura bashcov
       - name: "Execute code coverage"
         id: "coverage"
         env:
@@ -41,10 +42,16 @@ jobs:
           #sudo apt-get -qq -y install moreutils 1>/dev/null
           export OPENSOURCE_ONLY='true'
           bash './build.sh' 1>/dev/null
+          #bashcov './build.sh' | TZ=UTC ts '[%H:%M:%S]'
+          # Testing zip installation...
           bashcov './recovery-simulator/recovery.sh' ./output/*.zip
           printf '\n\n'
-          ls -R "${{ github.workspace }}/coverage"
+          #ls -R "${{ github.workspace }}/coverage"
           cat "${{ github.workspace }}/coverage/codecov-result.json"
+          echo '==============='
+          echo 'RECOVERY OUTPUT'
+          echo '==============='
+          #cat './recovery-simulator/output/recovery-output.log'
       - name: "Upload reports to Codecov"
         uses: codecov/codecov-action@v3
         with:
