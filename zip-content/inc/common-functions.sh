@@ -49,18 +49,6 @@ ui_msg_empty_line()
   _show_text_on_recovery ' '
 }
 
-# @description My super function 2.
-# Not thread-safe.
-#
-# @example
-#    echo "test: $(say-hello World)"
-#
-# @arg $1 string A value to print
-#
-# @exitcode 0 If successful.
-# @exitcode 1 If an empty string passed.
-#
-# @see validate()
 ui_msg()
 {
   _show_text_on_recovery "${1:?}"
@@ -466,11 +454,13 @@ string_split()
 
 # @description Setup an app for later installation.
 # (it automatically installs it depending on the SDK)
-# 
-# @arg $1 integer Default installation setting.
-# @arg $2 string Name.
-# @arg $3 string Filename.
-# @arg $4 string Folder.
+#
+# @arg $1 boolean Default installation setting
+# @arg $2 string Name of the app
+# @arg $3 string Filename of the app
+# @arg $4 string Folder of the app
+#
+# @exitcode 0 If successful.
 setup_app()  # $1 => Default setting  $2 => Name  $3 => Filename  $4 => Folder
 {
   local _install _app_conf _min_sdk _max_sdk
