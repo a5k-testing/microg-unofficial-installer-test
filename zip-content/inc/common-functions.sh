@@ -2,15 +2,6 @@
 # @file common-functions.sh
 # @brief A library with common functions used during flashable ZIP installation.
 
-# SPDX-FileCopyrightText: (c) 2016 ale5000
-# SPDX-License-Identifier: GPL-3.0-or-later
-# SPDX-FileType: SOURCE
-
-# shellcheck disable=SC3043
-# SC3043: In POSIX sh, local is undefined
-
-### PREVENTIVE CHECKS ###
-
 if test -z "${RECOVERY_PIPE:-}" || test -z "${OUTFD:-}" || test -z "${ZIPFILE:-}" || test -z "${TMP_PATH:-}" || test -z "${DEBUG_LOG:-}"; then
   echo 'Some variables are NOT set.'
   exit 90
@@ -18,8 +9,6 @@ fi
 
 mkdir -p "${TMP_PATH:?}/func-tmp" || ui_error 'Failed to create the functions temp folder'
 
-
-### FUNCTIONS ###
 
 # @section Message related functions
 
