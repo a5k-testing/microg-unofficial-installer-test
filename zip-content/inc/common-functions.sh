@@ -52,12 +52,15 @@ ui_warning()
   1>&2 printf '\033[0;33m%s\033[0m\n' "WARNING: ${1:?}"
 }
 
+# @description My super function 1.
+#
+# @arg $1 string A value to print
 ui_msg_empty_line()
 {
   _show_text_on_recovery ' '
 }
 
-# @description My super function.
+# @description My super function 2.
 # Not thread-safe.
 #
 # @example
