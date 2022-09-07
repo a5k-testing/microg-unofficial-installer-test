@@ -7,12 +7,14 @@
 # shellcheck disable=SC3043
 # SC3043: In POSIX sh, local is undefined
 
-### GLOBAL VARIABLES ###
+### PREVENTIVE CHECKS ###
 
 if test -z "${RECOVERY_PIPE:-}" || test -z "${OUTFD:-}" || test -z "${ZIPFILE:-}" || test -z "${TMP_PATH:-}" || test -z "${DEBUG_LOG:-}"; then
   echo 'Some variables are NOT set.'
   exit 90
 fi
+
+mkdir -p "${TMP_PATH:?}/func-tmp" || ui_error 'Failed to create the functions temp folder'
 
 
 ### FUNCTIONS ###
@@ -20,20 +22,25 @@ fi
 # Message related functions
 _show_text_on_recovery()
 {
-  if test -e "${RECOVERY_PIPE:?}"; then
+  if test "${BOOTMODE:?}" = 'true'; then
+    printf '%s\n' "${1?}"
+    return
+  elif test -e "${RECOVERY_PIPE:?}"; then
     printf 'ui_print %s\nui_print\n' "${1?}" >> "${RECOVERY_PIPE:?}"
   else
     printf 'ui_print %s\nui_print\n' "${1?}" 1>&"${OUTFD:?}"
   fi
+
+  if test "${DEBUG_LOG:?}" -ne 0; then printf '%s\n' "${1?}"; fi
 }
 
 ui_error()
 {
   ERROR_CODE=91
-  if test -n "${2}"; then ERROR_CODE="${2:?}"; fi
+  if test -n "${2:-}"; then ERROR_CODE="${2:?}"; fi
   _show_text_on_recovery "ERROR: ${1:?}"
   1>&2 printf '\033[1;31m%s\033[0m\n' "ERROR ${ERROR_CODE:?}: ${1:?}"
-  exit "${ERROR_CODE:?}"
+  abort '' 2>/dev/null || exit "${ERROR_CODE:?}"
 }
 
 ui_warning()
@@ -45,13 +52,11 @@ ui_warning()
 ui_msg_empty_line()
 {
   _show_text_on_recovery ' '
-  if test "${DEBUG_LOG}" -ne 0; then printf '\n'; fi
 }
 
 ui_msg()
 {
   _show_text_on_recovery "${1:?}"
-  if test "${DEBUG_LOG}" -ne 0; then printf '%s\n' "${1:?}"; fi
 }
 
 ui_msg_sameline_start()
@@ -94,22 +99,82 @@ validate_return_code_warning()
 mount_partition()
 {
   local partition
-  partition="$(readlink -f "${1}")" || { partition="${1}"; ui_warning "Failed to canonicalize '${1}'"; }
+  partition="$(readlink -f "${1:?}")" || { partition="${1:?}"; ui_warning "Failed to canonicalize '${1}'"; }
 
-  mount "${partition}" || ui_warning "Failed to mount '${1}'"
+  mount "${partition:?}" || ui_warning "Failed to mount '${partition}'"
+  return 0  # Never fail
+}
+
+mount_partition_silent()
+{
+  local partition
+  partition="$(readlink -f "${1:?}")" || { partition="${1:?}"; }
+
+  mount "${partition:?}" 2>/dev/null || true
+  return 0  # Never fail
+}
+
+unmount()
+{
+  local partition
+  partition="$(readlink -f "${1:?}")" || { partition="${1:?}"; ui_warning "Failed to canonicalize '${1}'"; }
+
+  umount "${partition:?}" || ui_warning "Failed to unmount '${partition}'"
+  return 0  # Never fail
 }
 
 is_mounted()
 {
-  local _partition _mount_result
-  _partition="$(readlink -f "${1:?}")" || { _partition="${1:?}"; ui_warning "Failed to canonicalize '${1}'"; }
-  { test -e '/proc/mounts' && _mount_result="$(cat /proc/mounts)"; } || _mount_result="$(mount 2>/dev/null)" || { test -n "${DEVICE_MOUNT:-}" && _mount_result="$("${DEVICE_MOUNT:?}")"; } || ui_error 'is_mounted has failed'
+  local _partition _mount_result _silent
+  _silent="${2:-false}"
+  _partition="$(readlink -f "${1:?}")" || { _partition="${1:?}"; if test "${_silent:?}" = false; then ui_warning "Failed to canonicalize '${1}'"; fi; }
+
+  { test "${TEST_INSTALL:-false}" = 'false' && test -e '/proc/mounts' && _mount_result="$(cat /proc/mounts)"; } || _mount_result="$(mount 2>/dev/null)" || { test -n "${DEVICE_MOUNT:-}" && _mount_result="$("${DEVICE_MOUNT:?}")"; } || ui_error 'is_mounted has failed'
 
   case "${_mount_result:?}" in
     *[[:blank:]]"${_partition:?}"[[:blank:]]*) return 0;;  # Mounted
     *)                                                     # NOT mounted
   esac
   return 1  # NOT mounted
+}
+
+_mount_if_needed_silent()
+{
+  if is_mounted "${1:?}" true; then return 1; fi
+
+  mount_partition_silent "${1:?}"
+  is_mounted "${1:?}" true
+  return "${?}"
+}
+
+UNMOUNT_SYS_EXT=0
+UNMOUNT_PRODUCT=0
+UNMOUNT_VENDOR=0
+mount_extra_partitions_silent()
+{
+  ! _mount_if_needed_silent '/system_ext'
+  UNMOUNT_SYS_EXT="${?}"
+  ! _mount_if_needed_silent '/product'
+  UNMOUNT_PRODUCT="${?}"
+  ! _mount_if_needed_silent '/vendor'
+  UNMOUNT_VENDOR="${?}"
+
+  return 0  # Never fail
+}
+
+unmount_extra_partitions()
+{
+  if test "${UNMOUNT_SYS_EXT:?}" = '1'; then
+    unmount '/system_ext'
+  fi
+  if test "${UNMOUNT_PRODUCT:?}" = '1'; then
+    unmount '/product'
+  fi
+  if test "${UNMOUNT_VENDOR:?}" = '1'; then
+    unmount '/vendor'
+  fi
+
+  return 0  # Never fail
 }
 
 ensure_system_is_mounted()
@@ -143,11 +208,6 @@ remount_read_write()
 remount_read_only()
 {
   mount -o remount,ro "$1" "$1"
-}
-
-unmount()
-{
-  umount "$1" || ui_warning "Failed to unmount '$1'"
 }
 
 # Getprop related functions
@@ -189,10 +249,19 @@ replace_slash_with_at()
   echo "${result}"
 }
 
-replace_line_in_file()  # $1 => File to process  $2 => Line to replace  $3 => File to read for replacement text
+replace_line_in_file()  # $1 => File to process  $2 => Line to replace  $3 => Replacement text
 {
-  sed -i "/$2/r $3" "$1" || ui_error "Failed to replace (1) a line in the file => '$1'" 92
-  sed -i "/$2/d" "$1" || ui_error "Failed to replace (2) a line in the file => '$1'" 92
+  rm -f -- "${TMP_PATH:?}/func-tmp/replacement-string.dat"
+  echo "${3:?}" > "${TMP_PATH:?}/func-tmp/replacement-string.dat" || ui_error "Failed to replace (1) a line in the file => '${1}'" 92
+  sed -i -e "/${2:?}/r ${TMP_PATH:?}/func-tmp/replacement-string.dat" -- "${1:?}" || ui_error "Failed to replace (2) a line in the file => '${1}'" 92
+  sed -i -e "/${2:?}/d" -- "${1:?}" || ui_error "Failed to replace (3) a line in the file => '${1}'" 92
+  rm -f -- "${TMP_PATH:?}/func-tmp/replacement-string.dat"
+}
+
+replace_line_in_file_with_file()  # $1 => File to process  $2 => Line to replace  $3 => File to read for replacement text
+{
+  sed -i -e "/${2:?}/r ${3:?}" -- "${1:?}" || ui_error "Failed to replace (1) a line in the file => '$1'" 92
+  sed -i -e "/${2:?}/d" -- "${1:?}" || ui_error "Failed to replace (2) a line in the file => '$1'" 92
 }
 
 search_string_in_file()
@@ -221,9 +290,7 @@ set_perm()
   local uid="$1"; local gid="$2"; local mod="$3"
   shift 3
   # Quote: Previous versions of the chown utility used the dot (.) character to distinguish the group name; this has been changed to be a colon (:) character, so that user and group names may contain the dot character
-  if test "${TEST_INSTALL:-false}" = 'false'; then
-    chown "${uid}:${gid}" "$@" || chown "${uid}.${gid}" "$@" || ui_error "chown failed on: $*" 81
-  fi
+  chown "${uid}:${gid}" "$@" || chown "${uid}.${gid}" "$@" || ui_error "chown failed on: $*" 81
   chmod "${mod}" "$@" || ui_error "chmod failed on: $*" 81
 }
 
@@ -362,7 +429,46 @@ delete_dir_if_empty()
   fi
 }
 
-list_files()  # $1 => Folder to scan   $2 => Prefix to remove
+file_get_first_line_that_start_with()
+{
+  grep -m 1 -e "^${1:?}" -- "${2:?}" || return "${?}"
+}
+
+string_split()
+{
+  printf '%s' "${1:?}" | cut -d '|' -sf "${2:?}" || return "${?}"
+}
+
+# @description Setup an app for later installation.
+# (it automatically installs it depending on the SDK)
+# @arg $1 integer Default setting.
+# @arg $2 string Name.
+# @arg $3 string Filename.
+# @arg $4 string Folder.
+setup_app()  # $1 => Default setting  $2 => Name  $3 => Filename  $4 => Folder
+{
+  local _install _app_conf _min_sdk _max_sdk
+  _install="${1:-0}"
+  _app_conf="$(file_get_first_line_that_start_with "${4:?}/${3:?}|" "${TMP_PATH}/files/system-apps/file-list.dat")" || ui_error "Failed to get app config for '${2}'"
+  _min_sdk="$(string_split "${_app_conf:?}" 2)" || ui_error "Failed to get min SDK for '${2}'"
+  _max_sdk="$(string_split "${_app_conf:?}" 3)" || ui_error "Failed to get max SDK for '${2}'"
+  _output_name="$(string_split "${_app_conf:?}" 4)" || ui_error "Failed to get output name for '${2}'"
+
+  if test "${API:?}" -ge "${_min_sdk:?}" && test "${API:?}" -le "${_max_sdk:-99}"; then
+    if test "${live_setup_enabled:?}" = 'true'; then
+      choose "Do you want to install ${2:?}?" '+) Yes' '-) No'
+      if test "${?}" -eq 3; then _install='1'; else _install='0'; fi
+    fi
+
+    if test "${_install:?}" -ne 0; then
+      echo move_rename_file "${TMP_PATH}/files/system-apps/${4:?}/${3:?}.apk" "${TMP_PATH}/files/${4:?}/${_output_name:?}.apk"
+    fi
+  else
+    ui_debug "Skipped: ${2:?}"
+  fi
+}
+
+list_files()  # $1 => Folder to scan  $2 => Prefix to remove
 {
   test -d "$1" || return
   for entry in "$1"/*; do
@@ -479,7 +585,9 @@ _choose_remapper()
   local _key
   _key="${1?}" || ui_error 'Missing parameter for _choose_remapper'
   if test -z "${_key?}"; then _key='Enter'; elif test "${_key:?}" = "${_esc_keycode:?}"; then _key='ESC'; fi
+  ui_msg_empty_line
   ui_msg "Key press: ${_key:?}"
+  ui_msg_empty_line
 
   case "${_key:?}" in
     '+')    # +
