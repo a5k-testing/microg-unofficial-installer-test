@@ -56,6 +56,18 @@ ui_msg_empty_line()
   _show_text_on_recovery ' '
 }
 
+# @description My super function.
+# Not thread-safe.
+#
+# @example
+#    echo "test: $(say-hello World)"
+#
+# @arg $1 string A value to print
+#
+# @exitcode 0 If successful.
+# @exitcode 1 If an empty string passed.
+#
+# @see validate()
 ui_msg()
 {
   _show_text_on_recovery "${1:?}"
