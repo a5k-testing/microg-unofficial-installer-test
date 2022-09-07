@@ -458,7 +458,7 @@ string_split()
 # @description Setup an app for later installation.
 # (it automatically installs it depending on the SDK)
 #
-# @arg $1 boolean Default installation setting
+# @arg $1 integer Default installation setting
 # @arg $2 string Name of the app
 # @arg $3 string Filename of the app
 # @arg $4 string Folder of the app
