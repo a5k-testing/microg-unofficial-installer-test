@@ -57,7 +57,7 @@ jobs:
           cd ./shdoc
           sudo make install
           cd ..
-          shdoc < ./build.sh > ./doc.md
+          shdoc < ./zip-content/inc/common-functions.sh > ./doc.md
           cat ./doc.md
       - name: "Upload reports to Codecov"
         uses: codecov/codecov-action@v3
