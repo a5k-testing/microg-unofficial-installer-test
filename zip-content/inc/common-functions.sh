@@ -443,7 +443,8 @@ string_split()
 
 # @description Setup an app for later installation.
 # (it automatically installs it depending on the SDK)
-# @arg $1 integer Default setting.
+#
+# @arg $1 integer Default installation setting.
 # @arg $2 string Name.
 # @arg $3 string Filename.
 # @arg $4 string Folder.
