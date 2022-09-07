@@ -21,7 +21,8 @@ mkdir -p "${TMP_PATH:?}/func-tmp" || ui_error 'Failed to create the functions te
 
 ### FUNCTIONS ###
 
-# Message related functions
+# @section Message related functions
+
 _show_text_on_recovery()
 {
   if test "${BOOTMODE:?}" = 'true'; then
@@ -98,7 +99,9 @@ ui_debug()
   printf '%s\n' "${1?}"
 }
 
-# Error checking functions
+
+# @section Error checking functions
+
 validate_return_code()
 {
   if test "${1}" -ne 0; then ui_error "${2}"; fi
@@ -109,7 +112,9 @@ validate_return_code_warning()
   if test "${1}" -ne 0; then ui_warning "${2}"; fi
 }
 
-# Mounting related functions
+
+# @section Mounting related functions
+
 mount_partition()
 {
   local partition
@@ -224,7 +229,9 @@ remount_read_only()
   mount -o remount,ro "$1" "$1"
 }
 
-# Getprop related functions
+
+# @section Getprop related functions
+
 getprop()
 {
   (test -e '/sbin/getprop' && /sbin/getprop "ro.$1") || (grep "^ro\.$1=" '/default.prop' | head -n1 | cut -d '=' -f 2)
@@ -240,7 +247,9 @@ simple_get_prop()
   grep -F "${1}=" "${2}" | head -n1 | cut -d '=' -f 2
 }
 
-# String related functions
+
+# @section String related functions
+
 is_substring()
 {
   case "$2" in
@@ -298,7 +307,9 @@ search_ascii_string_as_utf16_in_file()
   return 1  # NOT found
 }
 
-# Permission related functions
+
+# @section Permission related functions
+
 set_perm()
 {
   local uid="$1"; local gid="$2"; local mod="$3"
@@ -314,7 +325,9 @@ set_std_perm_recursive()  # Use it only if you know your version of 'find' handl
   validate_return_code "$?" 'Failed to set permissions recursively'
 }
 
-# Extraction related functions
+
+# @section Extraction related functions
+
 package_extract_file()
 {
   local dir
@@ -345,7 +358,9 @@ zip_extract_dir()
   unzip -oq "$1" "$2/*" -d "$3" || ui_error "Failed to extract the dir '$2' from the archive '$1'" 96
 }
 
-# Data reset functions
+
+# @section Data reset functions
+
 reset_gms_data_of_all_apps()
 {
   if test -e '/data/data/'; then
@@ -355,7 +370,9 @@ reset_gms_data_of_all_apps()
   fi
 }
 
-# Hash related functions
+
+# @section Hash related functions
+
 verify_sha1()
 {
   if ! test -e "$1"; then ui_debug "The file to verify is missing => '$1'"; return 1; fi  # Failed
@@ -370,7 +387,9 @@ verify_sha1()
   return 0  # Success
 }
 
-# File / folder related functions
+
+# @section File / folder related functions
+
 create_dir() # Ensure dir exists
 {
   test -d "$1" && return
@@ -519,7 +538,9 @@ write_file_list()  # $1 => Folder to scan  $2 => Prefix to remove  $3 => Output 
   append_file_list "$@"
 }
 
-# Input related functions
+
+# @section Input related functions
+
 _find_hardware_keys()
 {
   if ! test -e '/proc/bus/input/devices'; then return 1; fi
@@ -722,7 +743,9 @@ choose()
   return "${_last_status:?}"
 }
 
-# Other
+
+# @section Other
+
 parse_busybox_version()
 {
   head -n1 | grep -oE 'BusyBox v[0-9]+\.[0-9]+\.[0-9]+' | cut -d 'v' -f 2
@@ -754,7 +777,9 @@ disable_debug_log()
   exec 1>&3 2>&4  # Restore stdout and stderr
 }
 
-# Test
+
+# @section Test
+
 find_test()  # This is useful to test 'find' - if every file/folder, even the ones with spaces, is displayed in a single line then your version is good
 {
   find "$1" -type d -exec echo 'FOLDER:' '{}' ';' -o -type f -exec echo 'FILE:' '{}' ';' | while read -r x; do echo "${x}"; done
