@@ -33,7 +33,7 @@ jobs:
     permissions:
       security-events: write
     name: "Codacy"
-    if: "${{ github.event_name != 'pull_request' }}"
+    if: "${{ github.event_name != 'pull_request' && github.repository_owner == 'micro5k' }}"
     runs-on: ubuntu-latest
 
     steps:
