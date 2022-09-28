@@ -27,6 +27,7 @@ jobs:
 
   codacy:
     permissions:
+      contents: read
       security-events: write
     name: "Codacy"
     runs-on: ubuntu-latest
