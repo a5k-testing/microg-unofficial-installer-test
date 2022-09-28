@@ -24,6 +24,7 @@ jobs:
         uses: a5k-actions/shellchecker@v0
         with:
           ignore-files: "gradlew"
+      - uses: ashutoshgngwr/validate-fastlane-supply-metadata@v2
 
   codacy:
     permissions:
