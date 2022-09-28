@@ -9,11 +9,12 @@ on:
     branches:
       - main
     tags:
-      - v*
+      - "v*"
   pull_request:
   workflow_dispatch:
 jobs:
   shellchecker:
+    permissions: {}
     name: "ShellChecker"
     runs-on: ubuntu-latest
 
@@ -23,21 +24,21 @@ jobs:
       - name: "ShellChecker"
         uses: a5k-actions/shellchecker@v0
         with:
-          ignore-files: "gradlew"
+          ignore-files: "gradlew|.simplecov"
       - uses: ashutoshgngwr/validate-fastlane-supply-metadata@v2
 
   codacy:
     permissions:
-      contents: read
       security-events: write
     name: "Codacy"
+    if: "${{ github.event_name != 'pull_request' && github.repository_owner == 'micro5k' }}"
     runs-on: ubuntu-latest
 
     steps:
       - name: "Check out code"
         uses: actions/checkout@v3
       - name: "Run Codacy analysis"
-        uses: codacy/codacy-analysis-cli-action@4.0.2
+        uses: codacy/codacy-analysis-cli-action@v4
         with:
           # Check https://github.com/codacy/codacy-analysis-cli#project-token to get your project token from your Codacy repository
           # You can also omit the token and run the tools that support default configurations
@@ -51,5 +52,31 @@ jobs:
       - name: "Upload SARIF results file"
         uses: github/codeql-action/upload-sarif@v2
         with:
-          sarif_file: results.sarif
-          category: Codacy
+          sarif_file: "results.sarif"
+          category: "Codacy"
+
+  sonarcloud:
+    permissions: {}
+    name: "SonarCloud"
+    if: "${{ github.event_name != 'pull_request' && github.repository_owner == 'micro5k' }}"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: "Check out code"
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: "0"
+      - name: "Remove build.gradle"
+        shell: bash
+        run: |
+          # Removing build.gradle...
+          rm -f build.gradle
+      - name: "Run SonarCloud scan"
+        uses: SonarSource/sonarcloud-github-action@v1.6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        # with:
+        #   args: >
+        #     -Dsonar.exclusions=build.gradle
+        #     -Dsonar.verbose=true
