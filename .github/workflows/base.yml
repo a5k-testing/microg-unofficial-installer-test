@@ -23,8 +23,8 @@ jobs:
       - name: "Set up Java"
         uses: actions/setup-java@v3
         with:
-          distribution: 'temurin'
-          java-version: '17'
+          distribution: "temurin"
+          java-version: "17"
       - name: "Set up Ruby"
         uses: ruby/setup-ruby@v1
         with:
@@ -39,37 +39,24 @@ jobs:
         env:
           COVERAGE: true
         run: |
-          # Executing code coverage...
-          #sudo apt-get -qq -y install moreutils 1>/dev/null
+          ### Executing code coverage...
+          workspace_path='${{ github.workspace }}'; readonly workspace_path
           export OPENSOURCE_ONLY='true'
-          bash './build.sh' 1>/dev/null
-          #bashcov './build.sh'  # To timestamp the output pipe it to: TZ=UTC ts '[%H:%M:%S]'
-          # Testing zip installation...
-          #bashcov './recovery-simulator/recovery.sh' ./output/*.zip
-          printf '\n\n'
-          #ls -R "${{ github.workspace }}/coverage"
-          #cat "${{ github.workspace }}/coverage/codecov-result.json"
-          #echo '==============='
-          #echo 'RECOVERY OUTPUT'
-          #echo '==============='
-          #cat './recovery-simulator/output/recovery-output.log'
-
-          git clone --recursive --quiet https://github.com/reconquest/shdoc
-          cd ./shdoc
-          sudo make install 1>/dev/null
-          cd ..
-          shdoc < ./zip-content/inc/common-functions.sh > ./doc.md
-          cat ./doc.md
-          echo '==============='
-          echo 'RECOVERY OUTPUT'
-          echo '==============='
-          #cat './recovery-simulator/output/recovery-output.log'
+          #sudo apt-get -qq -y install moreutils 1>/dev/null
+          # bashcov "${workspace_path:?}/build.sh"  # To timestamp the output pipe it to: TZ=UTC ts '[%H:%M:%S]'
+          ### Testing zip installation...
+          # bash "${workspace_path:?}/recovery-simulator/recovery.sh" "${workspace_path:?}"/output/*.zip
+          # printf '\n\n'
+          # echo '==============='
+          # echo 'RECOVERY OUTPUT'
+          # echo '==============='
+          # cat "${workspace_path:?}/recovery-simulator/output/recovery-output.log"
       - name: "SHA256"
-        if: "${{ github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/') }}"
+        if: "${{ github.event_name != 'pull_request' }}"
         run: |
           # SHA256...
-          sha256_hash='${{ steps.coverage.outputs.sha256_hash }}'
-          #echo "::notice::${sha256_hash:?}"
+          sha256_hash='${{ steps.coverage.outputs.sha256_hash }}'; readonly sha256_hash
+          echo "::notice::${sha256_hash:?}"
       - name: "Upload artifacts"
         if: "${{ github.ref == 'refs/heads/main' && github.repository_owner == 'micro5k' }}"
         uses: actions/upload-artifact@v3
@@ -77,3 +64,7 @@ jobs:
           name: "microG unofficial installer OSS build (extract it)"
           path: "output/*.zip*"
           retention-days: 7
+      - name: "Upload reports to Codecov"
+        uses: codecov/codecov-action@v3
+        with:
+          files: "${{ github.workspace }}/coverage/codecov-result.json"
