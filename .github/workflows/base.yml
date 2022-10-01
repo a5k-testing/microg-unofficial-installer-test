@@ -69,7 +69,7 @@ jobs:
           sha256_hash='${{ steps.coverage.outputs.sha256_hash }}'; readonly sha256_hash
           echo "::notice::${sha256_hash:-Missing hash}"
       - name: "Upload artifacts"
-        if: "${{ github.ref == 'refs/heads/main' && github.repository_owner == 'a5k-testing' }}"
+        if: "${{ false && github.ref == 'refs/heads/main' && github.repository_owner == 'a5k-testing' }}"
         uses: actions/upload-artifact@v3
         with:
           name: "microG unofficial installer OSS build (extract it)"
